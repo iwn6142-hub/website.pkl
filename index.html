@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Website Pembelajaran PKL</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial, sans-serif;
+}
+
+body{
+display:flex;
+min-height:100vh;
+background:linear-gradient(135deg,#ff512f,#dd2476,#24c6dc,#5433ff);
+background-size:400% 400%;
+animation:anim 10s ease infinite;
+}
+
+@keyframes anim{
+0%{background-position:0% 50%}
+50%{background-position:100% 50%}
+100%{background-position:0% 50%}
+}
+
+/* SIDEBAR */
+.sidebar{
+width:250px;
+background:rgba(0,0,0,0.75);
+color:white;
+padding:15px;
+backdrop-filter:blur(10px);
+}
+
+.sidebar h2{
+text-align:center;
+margin-bottom:15px;
+}
+
+.sidebar button{
+width:100%;
+padding:12px;
+margin:6px 0;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-weight:bold;
+transition:0.3s;
+}
+
+.sidebar button:hover{
+background:#24c6dc;
+color:white;
+}
+
+/* CONTENT */
+.main{
+flex:1;
+padding:20px;
+}
+
+.header{
+text-align:center;
+color:white;
+font-size:22px;
+font-weight:bold;
+margin-bottom:20px;
+}
+
+.card{
+background:white;
+padding:15px;
+border-radius:12px;
+margin-bottom:15px;
+box-shadow:0 10px 20px rgba(0,0,0,0.2);
+}
+
+input,textarea{
+width:100%;
+padding:10px;
+margin-top:8px;
+border-radius:8px;
+border:1px solid #ccc;
+}
+
+button.action{
+background:#24c6dc;
+color:white;
+border:none;
+padding:10px;
+margin-top:10px;
+border-radius:8px;
+cursor:pointer;
+width:100%;
+}
+
+/* LIST */
+ul{
+list-style:none;
+padding:0;
+}
+
+li{
+background:white;
+margin:8px 0;
+padding:10px;
+border-radius:10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+/* RESPONSIVE HP */
+@media(max-width:768px){
+body{
+flex-direction:column;
+}
+.sidebar{
+width:100%;
+display:flex;
+flex-wrap:wrap;
+justify-content:space-between;
+}
+.sidebar button{
+width:48%;
+}
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+<h2>PKL MENU</h2>
+<button onclick="show('dashboard')">Dashboard</button>
+<button onclick="show('profil')">Profil</button>
+<button onclick="show('kegiatan')">Kegiatan</button>
+<button onclick="show('kesimpulan')">Kesimpulan</button>
+</div>
+
+<div class="main">
+
+<div class="header">Website Pembelajaran PKL</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="page">
+<div class="card">
+<h3>Pilih Tanggal / Hari</h3>
+<input type="date" id="tanggal">
+<button class="action" onclick="simpanTanggal()">Simpan</button>
+<p id="hasilTanggal"></p>
+</div>
+
+<div class="card">
+<h3>Total Catatan Kegiatan</h3>
+<p id="total">0</p>
+</div>
+</div>
+
+<!-- PROFIL -->
+<div id="profil" class="page" style="display:none">
+<div class="card">
+<h3>Profil Siswa</h3>
+<p><b>Nama:</b> Irwan Heryanto</p>
+<p><b>Asal Sekolah:</b> SMK Yadika 9 Bintara</p>
+<p><b>Kelas:</b> XI TJKT 1</p>
+<p><b>Tempat PKL:</b> PT. Fortunet Solusi Indonesia</p>
+</div>
+</div>
+
+<!-- KEGIATAN -->
+<div id="kegiatan" class="page" style="display:none">
+<div class="card">
+<h3>Tambah Kegiatan</h3>
+<input type="date" id="tglKeg">
+<input type="text" id="isiKeg" placeholder="Isi kegiatan...">
+<button class="action" onclick="tambah()">Tambah & Simpan</button>
+</div>
+
+<ul id="list"></ul>
+</div>
+
+<!-- KESIMPULAN -->
+<div id="kesimpulan" class="page" style="display:none">
+<div class="card">
+<h3>Kesimpulan</h3>
+<textarea id="kes"></textarea>
+<button class="action" onclick="simpanKes()">Simpan</button>
+<p id="hasilKes"></p>
+</div>
+</div>
+
+</div>
+
+<script>
+
+// ganti halaman
+function show(page){
+document.querySelectorAll('.page').forEach(p=>p.style.display='none');
+document.getElementById(page).style.display='block';
+}
+
+// tanggal
+function simpanTanggal(){
+let t=document.getElementById("tanggal").value;
+localStorage.setItem("tgl",t);
+document.getElementById("hasilTanggal").innerText="Tanggal: "+t;
+}
+
+// kegiatan tambah
+function tambah(){
+let t=document.getElementById("tglKeg").value;
+let isi=document.getElementById("isiKeg").value;
+
+if(!t || !isi){
+alert("Isi lengkap!");
+return;
+}
+
+let data=JSON.parse(localStorage.getItem("data")) || [];
+data.push({t,isi});
+localStorage.setItem("data",JSON.stringify(data));
+
+render();
+}
+
+// tampilkan
+function render(){
+let data=JSON.parse(localStorage.getItem("data")) || [];
+document.getElementById("total").innerText=data.length;
+
+document.getElementById("list").innerHTML=data.map((d,i)=>`
+<li>
+${d.t} - ${d.isi}
+<button onclick="hapus(${i})">Hapus</button>
+</li>
+`).join("");
+}
+
+// hapus
+function hapus(i){
+let data=JSON.parse(localStorage.getItem("data")) || [];
+data.splice(i,1);
+localStorage.setItem("data",JSON.stringify(data));
+render();
+}
+
+// kesimpulan
+function simpanKes(){
+let k=document.getElementById("kes").value;
+localStorage.setItem("kes",k);
+document.getElementById("hasilKes").innerText=k;
+}
+
+// load awal
+render();
+
+</script>
+
+</body>
+</html>
